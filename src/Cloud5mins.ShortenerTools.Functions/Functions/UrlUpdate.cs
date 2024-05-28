@@ -93,12 +93,23 @@ namespace Cloud5mins.ShortenerTools.Functions
                 }
 
                 // Validates if input.url is a valid aboslute url, aka is a complete refrence to the resource, ex: http(s)://google.com
-                if (!Uri.IsWellFormedUriString(input.Url, UriKind.Absolute))
+                try
                 {
-                    var badRequest = req.CreateResponse(HttpStatusCode.BadRequest);
-                    await badRequest.WriteAsJsonAsync(new { Message = $"{input.Url} is not a valid absolute Url. The Url parameter must start with 'http://' or 'http://'." });
-                    return badRequest;
+                    Uri uri = new Uri(input.Url);
                 }
+                catch (UriFormatException)
+                {
+                    var badResponse = req.CreateResponse(HttpStatusCode.BadRequest);
+                    await badResponse.WriteAsJsonAsync(new { Message = $"{input.Url} is not a valid absolute Url. The Url parameter must start with 'http://' or 'http://'." });
+                    return badResponse;
+                }
+
+                //if (!Uri.IsWellFormedUriString(input.Url, UriKind.Absolute))
+                //{
+                //    var badRequest = req.CreateResponse(HttpStatusCode.BadRequest);
+                //    await badRequest.WriteAsJsonAsync(new { Message = $"{input.Url} is not a valid absolute Url. The Url parameter must start with 'http://' or 'http://'." });
+                //    return badRequest;
+                //}
 
                 StorageTableHelper stgHelper = new StorageTableHelper(_settings.DataStorage);
 
